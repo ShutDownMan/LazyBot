@@ -41,11 +41,22 @@ class Commands():
 				self.Master.foxDriver.get("https://br.tribalwars2.com/")
 				loaded = True
 			except:
-				print "Page didn't load properly\n"
+				print "Page isn't loading properly\n"
 				# loaded stay false
+
+		if self.game.check_game_open() == True:
+			return
 
 		self.Master.page.WaitToLoadCSS(paths.Misc_Logo)
 
+
+
+		""" Game Page """
+		canvas = self.Master.page.FindElem(paths.Map_Canvas)
+
+		if canvas != None:
+			print 'Already logged in!'
+			return
 
 		""" Login related """
 		css_username = self.Master.page.FindElem(paths.Login_Username)
@@ -53,10 +64,10 @@ class Commands():
 		css_button = self.Master.page.FindElem(paths.Login_Button)
 
 		if css_username != None and self.Master.page.FindElemAttribute(css_username, "ng-model", "loginUsername") == True:
-			self.Master.page.Type(css_username, "LazyShut")
+			self.Master.page.Type(css_username, "")
 
 		if css_password != None and self.Master.page.FindElemAttribute(css_password, "ng-model", "loginPassword") == True:
-			self.Master.page.Type(css_password, "RTA402015")
+			self.Master.page.Type(css_password, "")
 
 		if css_button != None:
 			css_button.click()
@@ -72,12 +83,18 @@ class Commands():
 
 
 		""" Game Page """
-		self.Master.page.WaitToLoadCSS(paths.Map_Canvas, 20)
+		if self.game.check_game_open() == True:
+			reward_button = self.Master.page.get_elem(paths.Misc_Collect_Reward)
+			if reward_button != None:
+				reward_button.click()
 
-		reward_button = self.Master.page.get_elem(paths.Misc_Collect_Reward)
-		if reward_button != None:
-			reward_button.click()
+			merchan_X = self.Master.page.FindElem(paths.Misc_X_Of_Merchan)
+			if merchan_X != None:
+				merchan_X.click()
 
+			dispense_btn = self.Master.page.FindElem(paths.Misc_Dispense)
+			if dispense_btn != None:
+				merchan_X.click()
 
 
 #if __name__ == "__main__":

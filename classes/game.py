@@ -24,3 +24,12 @@ class Game():
 		canvas.click()
 		self.Master.page.sendKeys(canvas, Keys.ESCAPE)
 
+	def check_game_open(self):
+		""" Game Page """
+		canvas = self.Master.page.FindElem(paths.Map_Canvas)
+
+		if canvas != None:
+			print 'Already logged in!'
+			return True
+
+		return False
