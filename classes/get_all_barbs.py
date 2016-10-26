@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from PIL import Image
 import requests
+
 from StringIO import StringIO
+from PIL import Image
 
 
 class GetAllBarbs():
