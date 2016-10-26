@@ -66,17 +66,18 @@ class RallyPoint():
 			print 'Error on rally_menu when creating predefinition!'
 			return
 
-
 		global_predef_btn = rally_menu.find_element_by_xpath(relative.RallyPoint_ShowGlobal)
 		global_predef_btn.click()
 
-
 		global_predefs = self.Master.page.FindElem(paths.RallyPoint_GlobalPredefs)
-
 
 		if global_predefs == None:
 			print 'Error on global_predefs when creating predefinition!'
 			return
+
+		defaults_list = []
+		for unit in units_quant_inputs:
+			defaults_list.append('[' + unit + ' Farming' + ']')
 
 		# Runs through predefs and toggles the (disabled) default ones
 		try:
@@ -90,18 +91,19 @@ class RallyPoint():
 
 				toggle_btn = global_predefs.find_element_by_xpath(relative.RallyPoint_GlobalPredefToggle.replace('index', str(i+1)))
 
+				current_predef_text = current_predef.text
+
 				for unit in undone_predefinitions:
-					if '[' + unit + ' Farming' + ']' == current_predef.text:
+					if '[' + unit + ' Farming' + ']' == current_predef_text:
 						if 'switch-off' in self.Master.page.AttributeValue(toggle_btn, 'class'):
 							self.Master.ufile.update_village_status(unit, '0', '[0x00 - Village]', 'Predefinitions')
 							toggle_btn.click()
 						break
 
-				for unit, v in units_quant_inputs.items():
-					if '[' + unit + ' Farming' + ']' == current_predef.text:
-						if 'switch-off' in self.Master.page.AttributeValue(toggle_btn, 'class'):
-							print 'I told you not to touch the default predefs!'
-							toggle_btn.click()
+				if current_predef_text in defaults_list:
+					if 'switch-off' in self.Master.page.AttributeValue(toggle_btn, 'class'):
+						print 'I told you not to touch the default predefs!'
+						toggle_btn.click()
 
 				self.Master.game.wait(.3)
 
@@ -109,7 +111,7 @@ class RallyPoint():
 			print 'End of predef list!'
 			pass
 
-		self.Master.game.select_game()
+		self.Master.game.close_popup_menu(canvas)
 
 
 	def create_predefinitions(self, undone_predefinitions=None):
@@ -130,6 +132,8 @@ class RallyPoint():
 
 			self.Master.ufile.update_village_status(unit, str(current_unit_ideal_quant), '[0x00 - Village]', 'Predefinitions')
 
+		self.Master.foxDriver.execute_script('return arguments[0].scrollIntoView();', rally_menu)
+
 
 	def create_predef(self, unit, rally_menu=None, ideal_unit_quant=30):
 
@@ -137,7 +141,9 @@ class RallyPoint():
 			create_predef_btn = rally_menu.find_element_by_xpath(relative.RallyPoint_CreatePredef)
 			self.Master.foxDriver.execute_script('return arguments[0].scrollIntoView();', create_predef_btn)
 			create_predef_btn.click()
+
 			name_menu = self.Master.page.FindElem(paths.RallyPoint_NameMenu)
+
 			if name_menu == None:
 				print 'Error on name_menu when creating predefinition!'
 				return
@@ -167,7 +173,7 @@ class RallyPoint():
 
 			self.Master.page.Type(units_inputs, str(ideal_unit_quant))
 
-			save_btn = create_menu.find_element_by_xpath(relative.RallyPoint_CreateSaveBtn)
+
 
 			save_btn.click()
 
@@ -218,27 +224,36 @@ class RallyPoint():
 			print 'Error on rally_menu when creating predefinition!'
 			return
 
-		predefs = rally_menu.find_element_by_xpath(relative.RallyPoint_Predefs)
-
 		predef_to_modify = None
 
 		try:
 			i = 1
+			print i
 			while True:
-				current_predef = predefs.find_element_by_xpath(relative.RallyPoint_PredefName.replace('index', str(i)))
+				current_predef = rally_menu.find_element_by_xpath(relative.RallyPoint_Predefs.replace('index', str(i)))
 
-				if unit_to_modify in current_predef.text:
+				current_predef_text = current_predef.find_element_by_xpath(relative.RallyPoint_PredefName).text
+
+
+				if '[' + unit_to_modify + ' Farming' + ']' == current_predef_text:
 					predef_to_modify = current_predef
+					break
 
-			i += 1
+				i += 1
+				
 		except:
 			print 'End of predef list!'
 			pass
 
-		if current_predef != None:
+		if predef_to_modify != None:
 			if new_quant != None:
-				modify_btn = current_predef.find_element_by_xpath(relative.RallyPoint_EditPredef)
+				self.Master.foxDriver.execute_script('return arguments[0].scrollIntoView();', current_predef)
+				
+				modify_btn = predef_to_modify.find_element_by_xpath(relative.RallyPoint_EditPredef)
 				modify_btn.click()
+
+				# scroll up
+				self.Master.foxDriver.execute_script('return arguments[0].scrollIntoView();', rally_menu)
 
 				create_menu = self.Master.page.FindElem(paths.RallyPoint_CreateMenu)
 
@@ -248,10 +263,17 @@ class RallyPoint():
 
 				closest_common = create_menu.find_element_by_xpath(relative.RallyPoint_ClosestCommon)
 
-				units_inputs = closest_common.find_element_by_xpath(units_quant_inputs[unit])
+				unit_input = closest_common.find_element_by_xpath(units_quant_inputs[unit_to_modify])
 
-				self.Master.page.Type(units_inputs, str(new_quant))
+				unit_input.clear()
+				self.Master.page.Type(unit_input, str(new_quant))
 
+				save_btn = create_menu.find_element_by_xpath(relative.RallyPoint_CreateSaveBtn)
+				save_btn.click()
+
+				self.Master.ufile.update_village_status(unit_to_modify, new_quant, "[0x00 - Village]", "Predefinitions")
+
+				print 'Modifying of predef '+unit_to_modify+' to new value '+new_quant+' was successfull!'
 				pass
 
 		pass
