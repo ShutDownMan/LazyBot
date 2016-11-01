@@ -1,14 +1,8 @@
 LazyShut:{
 
 	Username:LazyShut
+	Password:JustAnotherDullPassword
 
-	A:{
-		Test: True
-	}
-
-	B:{
-		Test: True
-	}
 
 	Poenari:{
 
@@ -16,7 +10,11 @@ LazyShut:{
 			Raiding Path:0
 		}
 
+		Resource Deposit: 0x00 - Village
+
 		0x00 - Village:{
+
+			Village: True
 
 			Position: 558|468
 
@@ -73,10 +71,35 @@ LazyShut:{
 				Timber Camp
 				Clay pit
 				Iron Mine
+				Farm
+				Warehouse
+				Timber Camp
+				Clay pit
+				Iron Mine
+				Farm
+				Warehouse
+				Timber Camp
+				Clay pit
+				Iron Mine
+				Farm
+				Warehouse
+				Timber Camp
+				Clay pit
+				Iron Mine
+				Farm
+				Warehouse
+				Timber Camp
+				Clay pit
+				Iron Mine
+				Farm
+				Warehouse
+				Timber Camp
+				Clay pit
+				Iron Mine
 			]
 
 		}
 
 	}
 
-}
+}}

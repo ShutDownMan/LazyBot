@@ -1,0 +1,60 @@
+
+Units Stats:{
+
+	Spearman:{
+		Carrying Capacity: 25
+		Velocity: 00:14:00
+		Hotkey: 1
+		Unit Bar ID: 1
+	}
+
+	Swordsman:{
+		Carrying Capacity: 15
+		Velocity: 00:18:00
+		Hotkey: 2
+		Unit Bar ID: 2
+	}
+
+	Viking:{
+		Carrying Capacity: 20
+		Velocity: 00:14:00
+		Hotkey: 3
+		Unit Bar ID: 3
+	}
+
+	Archer:{
+		Carrying Capacity: 10
+		Velocity: 00:14:00
+		Hotkey: 4
+		Unit Bar ID: 4
+	}
+
+	Light Cv:{
+		Carrying Capacity: 50
+		Velocity: 00:8:00
+		Hotkey: 5
+		Unit Bar ID: 5
+	}
+
+	Mnt Archer:{
+		Carrying Capacity: 50
+		Velocity: 00:8:00
+		Hotkey: 6
+		Unit Bar ID: 6
+	}
+
+	Heavy Cv:{
+		Carrying Capacity: 50
+		Velocity: 00:9:00
+		Hotkey: 7
+		Unit Bar ID: 7
+	}
+
+	Berseker:{
+		Carrying Capacity: 10
+		Velocity: 00:14:00
+		Hotkey: 8
+		Unit Bar ID: 10
+	}
+
+}
