@@ -18,7 +18,20 @@ units_quant_inputs = {
 		'Berseker':		relative.RallyPoint_CreateBerseker
 	}
 
+
+
 class RallyPoint():
+
+	units_predefs_hotkeys = {
+		'Spearman':		1,
+		'Swordsman':	2,
+		'Viking':		3,
+		'Archer':		4,
+		'Light Cv':		5,
+		'Mnt Archer':	6,
+		'Heavy Cv':		7,
+		'Berseker':		8
+	}
 
 	Master = None
 
@@ -27,7 +40,12 @@ class RallyPoint():
 		print 'RallyPoint module loaded!\n' + str(master)
 
 	def predefiniton_setup(self):
-		village_status = self.Master.ufile.get_village_status('[0x00 - Village]')
+		account = self.Master.current_account
+		world = self.Master.current_world
+		village = self.Master.current_village
+
+		village_status = self.Master.world_status
+
 		if village_status == {}:
 			print 'Invalid Village!'
 			return
@@ -47,14 +65,19 @@ class RallyPoint():
 
 			self.Master.game.select_game()
 
-			self.check_global_predefs(undone_predefinitions)
+			print undone_predefinitions, '\n-------------'
+			undone_predefinitions = self.check_global_predefs(undone_predefinitions)
+			print undone_predefinitions
 
 			self.create_predefinitions(undone_predefinitions)
 
-		self.Master.ufile.update_village_status('PredefinitionsSetup', 'True', '[0x00 - Village]')
+		self.Master.ufile.update_village_status('PredefinitionsSetup', 'True', account, world, village)
 
 
 	def check_global_predefs(self, undone_predefinitions=None):
+		account = self.Master.current_account
+		world = self.Master.current_world
+		village = self.Master.current_village
 
 		canvas = self.Master.page.get_elem(paths.Map_Canvas)
 		self.Master.page.sendKeys(canvas, 'R')
@@ -67,6 +90,7 @@ class RallyPoint():
 			return
 
 		global_predef_btn = rally_menu.find_element_by_xpath(relative.RallyPoint_ShowGlobal)
+		self.Master.foxDriver.execute_script('return arguments[0].scrollIntoView();', global_predef_btn)
 		global_predef_btn.click()
 
 		global_predefs = self.Master.page.FindElem(paths.RallyPoint_GlobalPredefs)
@@ -76,13 +100,13 @@ class RallyPoint():
 			return
 
 		defaults_list = []
-		for unit in units_quant_inputs:
+		for unit, v in units_quant_inputs.items():
 			defaults_list.append('[' + unit + ' Farming' + ']')
+			undone_predefinitions.append(unit)
 
 		# Runs through predefs and toggles the (disabled) default ones
 		try:
 			for i in range(50):
-				print i+1
 				current_predef = global_predefs.find_element_by_xpath(relative.RallyPoint_GlobalPredefName.replace('index', str(i+1)))
 
 				if current_predef == None:
@@ -93,19 +117,16 @@ class RallyPoint():
 
 				current_predef_text = current_predef.text
 
-				for unit in undone_predefinitions:
-					if '[' + unit + ' Farming' + ']' == current_predef_text:
-						if 'switch-off' in self.Master.page.AttributeValue(toggle_btn, 'class'):
-							self.Master.ufile.update_village_status(unit, '0', '[0x00 - Village]', 'Predefinitions')
-							toggle_btn.click()
-						break
-
 				if current_predef_text in defaults_list:
 					if 'switch-off' in self.Master.page.AttributeValue(toggle_btn, 'class'):
 						print 'I told you not to touch the default predefs!'
 						toggle_btn.click()
-
-				self.Master.game.wait(.3)
+						undone_predefinitions.remove(unit)
+						continue
+					for unit in undone_predefinitions:
+						if unit in current_predef_text:
+							undone_predefinitions.remove(unit)
+							continue
 
 		except:
 			print 'End of predef list!'
@@ -113,8 +134,13 @@ class RallyPoint():
 
 		self.Master.game.close_popup_menu(canvas)
 
+		return undone_predefinitions
 
 	def create_predefinitions(self, undone_predefinitions=None):
+		account = self.Master.current_account
+		world = self.Master.current_world
+		village = self.Master.current_village
+
 		canvas = self.Master.page.get_elem(paths.Map_Canvas)
 		self.Master.page.sendKeys(canvas, 'R')
 
@@ -126,11 +152,12 @@ class RallyPoint():
 
 		units_ideal_division = self.calc_ideal_predef_division(self.current_unit_quant())
 
+
 		for unit in undone_predefinitions:
 			current_unit_ideal_quant = units_ideal_division[unit] if units_ideal_division[unit] > 10 else 20
 			self.create_predef(unit, rally_menu, current_unit_ideal_quant)
 
-			self.Master.ufile.update_village_status(unit, str(current_unit_ideal_quant), '[0x00 - Village]', 'Predefinitions')
+			self.Master.ufile.update_village_status(unit, str(current_unit_ideal_quant), account, world, village, 'Predefinitions')
 
 		self.Master.foxDriver.execute_script('return arguments[0].scrollIntoView();', rally_menu)
 
@@ -170,26 +197,35 @@ class RallyPoint():
 			closest_common = create_menu.find_element_by_xpath(relative.RallyPoint_ClosestCommon)
 
 			units_inputs = closest_common.find_element_by_xpath(units_quant_inputs[unit])
-
 			self.Master.page.Type(units_inputs, str(ideal_unit_quant))
 
+			predef_hotkey = str(self.units_predefs_hotkeys[unit])
 
+			set_hotkey = create_menu.find_element_by_xpath(relative.RallyPoint_SetHotkey.replace('index', predef_hotkey))
+			self.Master.foxDriver.execute_script('return arguments[0].scrollIntoView();', set_hotkey)
+			set_hotkey.click()
 
+			self.Master.game.wait(1)
+
+			setto_attack = create_menu.find_element_by_xpath(relative.RallyPoint_SetToAttack.replace('index', predef_hotkey))
+			setto_attack.click()
+
+			self.Master.foxDriver.execute_script('return arguments[0].scrollIntoView();', rally_menu)
+
+			save_btn = create_menu.find_element_by_xpath(relative.RallyPoint_CreateSaveBtn)
 			save_btn.click()
 
 
 
-	def setup_flags(self, flag_order=(1,1,13), flag_menu=None):
+	def setup_flags(self, flag_order=(1,1,1), flag_menu=None):
 
 		if flag_menu != None:
 			flag_common = flag_menu.find_element_by_xpath(relative.RallyPoint_FlagCommon)
 			for i in range(1,4):
 				flag_path = (relative.RallyPoint_Buttons.replace('index', str(i)))
-				print flag_path
 				''' Determines shortest path to desired flag '''
 				flag = flag_order[i-1]
 				flag = flag = flag-1 if flag < 16-flag else -(16-flag)-1
-				print flag
 
 				if flag != 0:
 					if flag > 0:
@@ -218,6 +254,10 @@ class RallyPoint():
 		canvas = self.Master.page.get_elem(paths.Map_Canvas)
 		self.Master.page.sendKeys(canvas, 'R')
 
+		account = self.Master.current_account
+		world = self.Master.current_world
+		village = self.Master.current_village
+
 		rally_menu = self.Master.page.FindElem(paths.RallyPoint_Menu)
 
 		if rally_menu == None:
@@ -228,7 +268,6 @@ class RallyPoint():
 
 		try:
 			i = 1
-			print i
 			while True:
 				current_predef = rally_menu.find_element_by_xpath(relative.RallyPoint_Predefs.replace('index', str(i)))
 
@@ -271,51 +310,49 @@ class RallyPoint():
 				save_btn = create_menu.find_element_by_xpath(relative.RallyPoint_CreateSaveBtn)
 				save_btn.click()
 
-				self.Master.ufile.update_village_status(unit_to_modify, new_quant, "[0x00 - Village]", "Predefinitions")
+				self.Master.ufile.update_village_status(unit_to_modify, new_quant, account, world, village, "Predefinitions")
 
 				print 'Modifying of predef '+unit_to_modify+' to new value '+new_quant+' was successfull!'
 				pass
-
 		pass
 
-	def calc_ideal_predef_division(self, troops, village=''):
-		troops_cc = collections.OrderedDict()
+
+	def calc_ideal_predef_division(self, units_list={'Unit':0}):
+		units_cc = collections.OrderedDict()
 		totalSumCC = 0
 
-		troops_carrying_capacity = self.Master.ufile.get_config('Troops Carrying Capacity')
-		i = 0
-		for line in troops_carrying_capacity:
-			m_stat = line.replace('\t','')
-			m_stat = m_stat.strip()
-			splited = m_stat.split('>')
-			totalSumCC += int(splited[1])*troops[i]
-			troops_cc.update({str(splited[0]):int(splited[1])})
-			i += 1
+		units_stats = self.Master.Units_Stats
+
+		units_carrying_capacity = self.Master.Units_Stats
+
+		for unit, quant in units_list.items():
+			carry_capacity = int(units_carrying_capacity[unit]['Carrying Capacity'])
+			totalSumCC += carry_capacity*quant
+			units_cc.update({unit:carry_capacity})
 
 	#	print 'Total carry capacity: ' + str(totalSumCC)+'\n----------'
 
 		CCRationed = totalSumCC/float(50)
 	#	print 'Ideal division per farm troop:\n' + str(CCRationed)+'\n----------'
 
-		for k, v in troops_cc.items():
+		for k, v in units_cc.items():
 			if v > 0:
 				quant = round(CCRationed/v)
 	#			print k+'s Farm:\n'	+ str(quant)+'\n----------'
 
-		if village != '':
-			village_status = self.Master.ufile.get_village_status('[0x00 - Village]')
-			current_log = None
+		village_status = self.Master.world_status
+		current_log = None
 
-			for status, value in village_status.items():
-				if 'Ideal troop division' in status:
-					current_log = status
+		for status, value in village_status.items():
+			if 'Ideal troop division' in status:
+				current_log = status
 
-		return troops_cc
+		return units_cc
 
 
 	def current_unit_quant(self):
 		unit_bar = self.Master.page.get_elem(paths.UnitQuant_UnitBar)
-
+		units_stats = self.Master.Units_Stats
 		unit_bar_parent = unit_bar.find_element_by_xpath('./..')
 
 		if 'expanded' not in self.Master.page.AttributeValue(unit_bar_parent, 'class'):
@@ -323,12 +360,13 @@ class RallyPoint():
 			unit_bar_btn.click()
 			self.Master.game.wait(1)
 
-		unit_quantity = [1,2,3,4,5,6,7,10]
+		unit_quantity = {}
 
-		for i in range(8):
-			unit_quant = unit_bar.find_element_by_xpath(relative.UnitQuant_UnitList.replace('index', str(unit_quantity[i]))).text
+		for unit in units_stats:
+			bar_id = units_stats[unit]['Unit Bar ID']
+			unit_quant = unit_bar.find_element_by_xpath(relative.UnitQuant_UnitList.replace('index', str(bar_id))).text
 
-			unit_quantity[i] = int(unit_quant)
+			unit_quantity.update({unit:int(unit_quant)})
 
 		return unit_quantity
 
@@ -343,12 +381,15 @@ class RallyPoint():
 			print 'Error on unit_menu when creating predefinition!'
 			return
 
-		unit_quantity = [1,2,3,4,5,6,7,10]
-		
-		for i in range(8):
-			unit_quant = unit_menu.find_element_by_xpath(relative.UnitQuant_UnitHorizontal.replace('index', str(unit_quantity[i]))).text
+		units_stats = self.Master.Units_Stats
 
-			unit_quantity[i] = int(unit_quant)
+		unit_quantity = {}
+
+		for unit in units_stats:
+			bar_id = units_stats[unit]['Unit Bar ID']
+			unit_quant = unit_menu.find_element_by_xpath(relative.UnitQuant_UnitHorizontal.replace('index', str(hbar_id))).text
+
+			unit_quantity[unit] = int(unit_quant)
 
 		self.Master.game.select_game(unit_menu)
 

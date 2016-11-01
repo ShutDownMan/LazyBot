@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-import io
+
 from selenium.webdriver.common.keys import Keys
 
 from css_paths import CSS_Paths as paths
@@ -30,6 +30,16 @@ class Build_Upgrader():
 		self.Master = master
 		print "Build Upgrader loaded!\n" + str(master)
 
+	def check_build_schedule(self):
+		build_schedule = self.get_build_schedule()
+
+		for build in build_schedule:
+			self.check_green_mark()
+			success = self.upgrade_building(build)
+			if success == False:
+				break
+
+
 	def check_green_mark(self):
 		elem = self.Master.page.get_elem(paths.Build_Finish_Build)
 		if elem != None:
@@ -42,6 +52,8 @@ class Build_Upgrader():
 		canvas = self.Master.page.get_elem(paths.Map_Canvas)
 		self.Master.game.select_game(canvas)
 		self.Master.page.Type(canvas, "H")
+
+		success = False
 
 		boxPaper = self.Master.page.FindElem(paths.Build_BoxPaper)
 		if boxPaper != None:
@@ -64,17 +76,21 @@ class Build_Upgrader():
 		if buildingBtn != None and btn_orange > btn_grey:
 			buildingBtn.click()
 			print "Successfully upgraded building: " + building
+			success = True
 		else:
 			print "Couldn't upgrade building: " + building
+			success = False
 
-	#	pagex = self.Master.page.get_elem(paths.Build_PageX)	
-		self.Master.page.sendKeys(canvas, Keys.ESCAPE)
+		self.Master.foxDriver.execute_script('return arguments[0].scrollIntoView();', boxPaper)
+
+		self.Master.game.select_game()
+
+		return success
 
 
-	def get_build_List(self, village):		
-		file = io.open('..\\Villages\\0x00 - Village\\To Build.txt', "r")
-		buildList = file.readlines()
-		file.close()
-
-		return buildList
+	def get_build_schedule(self):
+		village_status = self.Master.village_status
+		print village_status
+		build_schedule = village_status['Build Schedule']
+		return build_schedule
 

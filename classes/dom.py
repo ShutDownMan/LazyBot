@@ -18,19 +18,28 @@ class DOM():
 		print "DOM module loaded!\n" + str(master)
 
 	def FindElem(self, cssPath, lim=10):
-		if self.WaitToLoadCSS(cssPath, lim) == True:
-			elem = self.Master.foxDriver.find_element_by_css_selector(cssPath)
-			return elem
+		try:
+			if self.WaitToLoadCSS(cssPath, lim) == True:
+				elem = self.Master.foxDriver.find_element_by_css_selector(cssPath)
+				return elem
+		except:
+			print "Error on FindElem with path: ", cssPath
 
 	def FindElemByxPath(self, xpath, lim=10):
-		if self.WaitToLoadxPath(xpath, lim) == True:
-			elem = self.Master.foxDriver.find_element_by_xpath(xpath)
-			return elem
+		try:
+			if self.WaitToLoadxPath(xpath, lim) == True:
+				elem = self.Master.foxDriver.find_element_by_xpath(xpath)
+				return elem
+		except:
+			print "Error on FindElemByxPath with path: ", xpath
 
 	def FindElems(self, cssPath, lim=10):
-		if self.WaitToLoadCSS(cssPath, lim) == True:
-			elem = self.Master.foxDriver.find_elements_by_css_selector(cssPath)
-			return elem
+		try:
+			if self.WaitToLoadCSS(cssPath, lim) == True:
+				elem = self.Master.foxDriver.find_elements_by_css_selector(cssPath)
+				return elem
+		except:
+			print "Error on FindElems with path: ", cssPath
 
 	def get_elem(self, cssPath):
 		elem = None
@@ -52,10 +61,10 @@ class DOM():
 		if len(elem) > 0:
 			return elem
 
-	def get_elem_by_xpath(self, xPath):
+	def get_elem_by_xpath(self, xpath):
 		elem = None
 		try:
-			elem = self.Master.foxDriver.find_element_by_xpath(xPath)
+			elem = self.Master.foxDriver.find_element_by_xpath(xpath)
 		except:
 			print "Elem not Found!"
 			

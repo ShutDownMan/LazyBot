@@ -1,0 +1,68 @@
+[0x00 - Village]:{
+
+	Village coord:000|000
+
+	Attacks occouring:0
+
+	000|000:{
+		Attacking:whenitgetsthere
+		Wait Until:0
+	}
+
+	100|000:{
+		Attacking: whenitgetsthere
+		Wait Until:0
+	}
+
+	200|000:{
+		Attacking: whenitgetsthere
+		Wait Until:0
+	}
+
+}
+
+[0x00 - Village]:{
+
+	Village coord:000|000
+
+	Attacks occouring:0
+
+	000|000:{
+		Attacking:whenitgetsthere
+		Wait Until:0
+	}
+
+	100|000:{
+		Attacking: whenitgetsthere
+		Wait Until:0
+	}
+
+	200|000:{
+		Attacking: whenitgetsthere
+		Wait Until:0
+	}
+
+}
+
+[0x00 - Village]:{
+
+	Village coord:000|000
+
+	Attacks occouring:0
+
+	000|000:{
+		Attacking:whenitgetsthere
+		Wait Until:0
+	}
+
+	100|000:{
+		Attacking: whenitgetsthere
+		Wait Until:0
+	}
+
+	200|000:{
+		Attacking: whenitgetsthere
+		Wait Until:0
+	}
+
+}

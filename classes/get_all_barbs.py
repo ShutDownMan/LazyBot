@@ -7,18 +7,22 @@ from StringIO import StringIO
 from PIL import Image
 
 
-class GetAllBarbs():
+class UpdateBarbarianList():
 
-	def __init__(self):
-		self.get_barbs()
+	Master = None
+
+	def __init__(self, master):
+		self.Master = master
+		print "UpdateBarbarianList module loaded!\n" + str(master)
+
 
 	def get_barbs(self):
-		response = requests.get("http://br.tw2-tools.com/br16/img_map/hash/eb7cd536c9a5e56c8098ad6cb74ee5e7/")
+		world = self.Master.current_world
+		barbarians_map = self.Master.BarbariansMap[world].replace('"', '')
+		response = requests.get(barbarians_map)
 		img = Image.open(StringIO(response.content))
 
 		barb_list = []
-
-	#	img = Image.open('\\World Map\\Barbarians World Map.png')
 
 		xCord = 66
 		yCord = 65

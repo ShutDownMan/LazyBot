@@ -1,0 +1,6 @@
+Barbarian Dynamic Maps:{
+
+	Poenari:"http://br.tw2-tools.com/br16/img_map/hash/eb7cd536c9a5e56c8098ad6cb74ee5e7/"
+	SomeOtherWorld:""
+
+}

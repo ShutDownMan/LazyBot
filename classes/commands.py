@@ -27,7 +27,7 @@ class Commands():
 
 	""" Open Game """
 
-	def open_game(self, username, password):
+	def log_in(self, username='', password=''):
 
 		""" Start Browser """
 		if self.Master.foxDriver == None:
@@ -44,19 +44,12 @@ class Commands():
 				print "Page isn't loading properly\n"
 				# loaded stay false
 
-		if self.game.check_game_open() == True:
+		if self.Master.game.check_game_open() == True:
 			return
 
 		self.Master.page.WaitToLoadCSS(paths.Misc_Logo)
 
 
-
-		""" Game Page """
-		canvas = self.Master.page.FindElem(paths.Map_Canvas)
-
-		if canvas != None:
-			print 'Already logged in!'
-			return
 
 		""" Login related """
 		css_username = self.Master.page.FindElem(paths.Login_Username)
@@ -64,13 +57,14 @@ class Commands():
 		css_button = self.Master.page.FindElem(paths.Login_Button)
 
 		if css_username != None and self.Master.page.FindElemAttribute(css_username, "ng-model", "loginUsername") == True:
-			self.Master.page.Type(css_username, "")
+			self.Master.page.Type(css_username, username)
 
 		if css_password != None and self.Master.page.FindElemAttribute(css_password, "ng-model", "loginPassword") == True:
-			self.Master.page.Type(css_password, "")
+			self.Master.page.Type(css_password, password)
 
 		if css_button != None:
 			css_button.click()
+
 
 
 		""" World Selection Page """
@@ -83,19 +77,28 @@ class Commands():
 
 
 		""" Game Page """
-		if self.game.check_game_open() == True:
-			reward_button = self.Master.page.get_elem(paths.Misc_Collect_Reward)
-			if reward_button != None:
-				reward_button.click()
 
-			merchan_X = self.Master.page.FindElem(paths.Misc_X_Of_Merchan)
-			if merchan_X != None:
-				merchan_X.click()
+		canvas = self.Master.page.FindElem(paths.Map_Canvas)
 
-			dispense_btn = self.Master.page.FindElem(paths.Misc_Dispense)
+		reward_button = self.Master.page.get_elem(paths.Misc_Collect_Reward)
+		if reward_button != None:
+			reward_button.click()
+
+		merchan_X = self.Master.page.FindElem(paths.Misc_X_Of_Merchan, 3)
+		if merchan_X != None:
+			merchan_X.click()
+			dispense_btn = self.Master.page.FindElem(paths.Misc_Dispense, 3)
 			if dispense_btn != None:
 				merchan_X.click()
 
+		show_timeline = self.Master.page.FindElem(paths.Misc_ShowTimeline)
+
+		if show_timeline == None:
+			print "The page didn't load properly"
+			return
+
+		if 'icon-34x34-arrow-up' in self.Master.page.AttributeValue(show_timeline, "class"):
+			show_timeline.click()
 
 #if __name__ == "__main__":
 #	cmd = Commands()	
